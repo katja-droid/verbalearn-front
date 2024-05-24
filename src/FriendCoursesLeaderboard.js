@@ -1,92 +1,74 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardBody, CardTitle, CardText } from 'reactstrap';
+import axios from 'axios';
+import { useAuthorization } from './AuthorizationContext';
 
 const FriendCoursesLeaderboard = () => {
-    const [courseLeaderboard, setCourseLeaderboard] = useState({});
+  const [friends, setFriends] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const { currentUser } = useAuthorization();
 
-    useEffect(() => {
-        // Mock currentUser and friends data
-        const currentUser = {
-            nickname: 'CurrentUser',
-            courses: [
-                { courseName: 'React', progress: { points: 80, totalPoints: 100 } },
-                { courseName: 'JavaScript', progress: { points: 60, totalPoints: 100 } }
-            ],
-            friends: [
-                {
-                    nickname: 'Friend1',
-                    courses: [
-                        { courseName: 'React', progress: { points: 70, totalPoints: 100 } },
-                        { courseName: 'JavaScript', progress: { points: 50, totalPoints: 100 } }
-                    ]
-                },
-                {
-                    nickname: 'Friend2',
-                    courses: [
-                        { courseName: 'React', progress: { points: 90, totalPoints: 100 } },
-                        { courseName: 'JavaScript', progress: { points: 80, totalPoints: 100 } }
-                    ]
-                }
-            ]
-        };
+  useEffect(() => {
+    const fetchFriendsAndCourses = async () => {
+      try {
+        // Fetch user's friends
+        const friendsResponse = await axios.get(`http://localhost:5001/users/${currentUser._id}/friends`);
+        const friendList = friendsResponse.data;
 
-        const leaderboard = {};
+        // Fetch all courses
+        const coursesResponse = await axios.get('http://localhost:5001/courses');
+        const coursesList = coursesResponse.data;
 
-        currentUser.courses.forEach(course => {
-            if (!leaderboard[course.courseName]) {
-                leaderboard[course.courseName] = [];
-            }
+        // Update state with friends and courses
+        setFriends(friendList);
+        setCourses(coursesList);
+      } catch (error) {
+        console.error('Error fetching friends and courses:', error);
+      }
+    };
 
-            const userProgress = calculateProgress(course.progress);
-            leaderboard[course.courseName].push({
-                nickname: currentUser.nickname,
-                progress: userProgress
-            });
+    fetchFriendsAndCourses();
+  }, [currentUser._id]);
 
-            currentUser.friends.forEach(friend => {
-                friend.courses.forEach(fCourse => {
-                    if (fCourse.courseName === course.courseName) {
-                        const friendProgress = calculateProgress(fCourse.progress);
-                        leaderboard[course.courseName].push({
-                            nickname: friend.nickname,
-                            progress: friendProgress
-                        });
-                    }
-                });
-            });
+  // Function to get the course index in the progress array
+  const getCourseIndex = (userId, courseId) => {
+    const user = friends.find(friend => friend._id === userId) || currentUser;
+    const progress = user.progress.find(progress => progress.courseId === courseId);
+    return progress ? user.progress.indexOf(progress) : -1;
+  };
 
-            leaderboard[course.courseName].sort((a, b) => b.progress - a.progress);
-        });
+  // Filter courses to include only those where all friends are enrolled
+  const filteredCourses = courses.filter(course =>
+    friends.every(friend =>
+      friend.progress.some(progress => progress.courseId === course._id)
+    )
+  );
 
-        console.log(leaderboard);  // Debugging output to inspect the structure
-        setCourseLeaderboard(leaderboard);
-    }, []);
-
-    function calculateProgress(progress) {
-        return progress.totalPoints > 0 ? ((progress.points / progress.totalPoints) * 100).toFixed(2) : 0;
-    }
-
-    return (
-        <div className="container mt-5">
-            <h2 className="mb-4">Course Leaderboards</h2>
-            {Object.entries(courseLeaderboard).map(([courseName, users]) => (
-                <div key={courseName} className="row mb-4">
-                    <div className="col">
-                        <Card>
-                            <CardBody>
-                                <CardTitle tag="h3">{courseName}</CardTitle>
-                                {users.map((user, index) => (
-                                    <CardText key={index} className={index % 2 === 0 ? 'bg-light' : 'bg-white'}>
-                                        {user.nickname} - {user.progress}%
-                                    </CardText>
-                                ))}
-                            </CardBody>
-                        </Card>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
+  return (
+    <div className="container">
+      <h2 className="mt-4 mb-4">Leaderboard</h2>
+      <div className="row">
+        {filteredCourses.map(course => (
+          <div key={course._id} className="col-md-6">
+            <div className="card mb-4">
+              <div className="card-header">{course.courseName}</div>
+              <ul className="list-group list-group-flush">
+                {/* Current User's Progress */}
+                <li key={currentUser._id} className="list-group-item">
+                  <strong>{currentUser.nickname}</strong> - {currentUser.progress[0].points} points
+                </li>
+                {/* Friends' Progress */}
+                {friends.map(friend => (
+                  <li key={friend._id} className="list-group-item">
+                    <strong>{friend.nickname}</strong> - {friend.progress[getCourseIndex(friend._id, course._id)].points} points
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default FriendCoursesLeaderboard;

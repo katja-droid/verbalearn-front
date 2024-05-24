@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuthorization } from './AuthorizationContext';
 
 const FriendSearch = () => {
     const [allUsersData, setAllUsersData] = useState([]);
-    const [currentUser, setCurrentUser] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [friends, setFriends] = useState([]);
+    const { currentUser } = useAuthorization();
 
     useEffect(() => {
         // Fetch all users data from your API
@@ -18,19 +19,7 @@ const FriendSearch = () => {
                 console.error('Error fetching all users data:', error);
             }
         };
-
-        // Fetch current user data from your API
-        const fetchCurrentUser = async () => {
-            try {
-                const response = await axios.get('http://localhost:5001/current-user');
-                setCurrentUser(response.data);
-            } catch (error) {
-                console.error('Error fetching current user data:', error);
-            }
-        };
-
         fetchAllUsers();
-        fetchCurrentUser();
     }, []);
 
     // Function to handle search
@@ -47,7 +36,9 @@ const FriendSearch = () => {
     const handleAddFriend = async (friend) => {
         try {
             // Make a POST request to add friend to the current user
-            await axios.post('http://localhost:5001/add-friend', { friendId: friend.id });
+            await axios.post(`http://localhost:5001/users/${currentUser._id}/friends`, {
+                friendId: friend._id
+            });
             setFriends([...friends, friend]);
         } catch (error) {
             console.error('Error adding friend:', error);
@@ -67,16 +58,20 @@ const FriendSearch = () => {
 
             <h3>Search Results</h3>
             <div className="row">
-                {searchResults.map(user => (
-                    <div key={user.id} className="col-md-4 mb-4">
-                        <div className="card">
-                            <div className="card-body">
-                                <h5 className="card-title">{user.nickname}</h5>
-                                <button className="btn btn-primary" onClick={() => handleAddFriend(user)}>Add Friend</button>
+                {searchResults.length === 0 ? (
+                    <p>No results found or you haven't entered your friend's nickname yet.</p>
+                ) : (
+                    searchResults.map(user => (
+                        <div key={user._id} className="col-md-4 mb-4">
+                            <div className="card">
+                                <div className="card-body">
+                                    <h5 className="card-title">{user.nickname}</h5>
+                                    <button className="btn btn-primary" onClick={() => handleAddFriend(user)}>Add Friend</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
         </div>
     );

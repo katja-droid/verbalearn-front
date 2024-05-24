@@ -68,7 +68,7 @@ function Topic() {
     return (
         <div>
             {!showQuestions && informationSlide}
-            {showQuestions && <QuestionNavigator questions={questions} />}
+            {showQuestions && <QuestionNavigator courseId = {course._id} questions={questions} />}
         </div>
     );
 }

@@ -1,118 +1,120 @@
 import React, { useState } from 'react';
 import MultipleChoiceQuestion from './MultipleChoiceQuestion';
-import TrueFalseQuestion from './TrueFalseQuestion';
 import FillInTheBlank from './FillInTheBlank';
+import TrueFalseQuestion from './TrueFalseQuestion';
 
-function QuestionNavigator({ questions }) {
+function QuestionNavigator({ questions, userId, courseId }) {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [responses, setResponses] = useState({});
-    const [results, setResults] = useState({});
-    const [completed, setCompleted] = useState(false);
+    const [selectedOption, setSelectedOption] = useState('');
+    const [response, setResponse] = useState('');
+    const [isCorrect, setIsCorrect] = useState(undefined);
+    const [triesLeft, setTriesLeft] = useState(3);
+
+    const handleResponse = (correct) => {
+        setIsCorrect(correct);
+        setResponse(correct ? 'Correct!' : 'Incorrect!');
+        if (!correct && triesLeft > 1) {
+            setTriesLeft(triesLeft - 1);
+        } else {
+            setTriesLeft(0);
+        }
+    };
 
     const handleNext = () => {
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
-        } else {
-            console.log('All questions answered.');
-            setCompleted(true);
+            resetQuestionState();
         }
     };
 
     const handlePrev = () => {
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
+            resetQuestionState();
         }
     };
 
-    const handleResponse = (selectedOption) => {
-        const updatedResponses = { ...responses };
-        const currentQuestion = questions[currentQuestionIndex];
-        const isCorrect = checkAnswer(selectedOption, currentQuestion.correctAnswer);
-        updatedResponses[currentQuestionIndex] = selectedOption;
-        setResponses(updatedResponses);
-        const updatedResults = { ...results };
-        updatedResults[currentQuestionIndex] = isCorrect;
-        setResults(updatedResults);
-    };
-    
-    const checkAnswer = (response, correctAnswer) => {
-        return response === correctAnswer;
-    };
-
-    const getCurrentQuestion = () => {
-        return questions[currentQuestionIndex];
+    const resetQuestionState = () => {
+        setSelectedOption('');
+        setResponse('');
+        setIsCorrect(undefined);
+        setTriesLeft(3);
     };
 
     const renderQuestion = () => {
-        if (completed) {
-            return <div>All questions completed. You can now submit your responses.</div>;
+        if (questions.length === 0) {
+            return <div>No questions available.</div>;
         }
 
-        const currentQuestion = getCurrentQuestion();
+        const currentQuestion = questions[currentQuestionIndex];
         const questionNumber = currentQuestionIndex + 1;
-
+       console.log(currentQuestion)
         switch (currentQuestion.type) {
             case 'multiple_choice':
                 return (
                     <MultipleChoiceQuestion
-                        {...currentQuestion}
-                        selectedOption={responses[currentQuestionIndex]} // Pass selectedOption
-                        setSelectedOption={(option) => setResponses({ ...responses, [currentQuestionIndex]: option })} // Pass setSelectedOption
-                        triesLeft={3} // Assuming a default value for triesLeft
-                        handleSubmit={() => handleResponse(responses[currentQuestionIndex])} // Pass handleSubmit
-                        response={responses[currentQuestionIndex]} // Pass response
-                        isCorrect={results[currentQuestionIndex]} // Pass isCorrect
+                        question={currentQuestion.question}
+                        options={currentQuestion.options}
+                        correctAnswer={currentQuestion.correctAnswer}
+                        selectedOption={selectedOption}
+                        setSelectedOption={setSelectedOption}
+                        handleSubmit={handleResponse}
+                        response={response}
+                        isCorrect={isCorrect}
+                        triesLeft={triesLeft}
                         questionNumber={questionNumber}
+                        userId={userId}
+                        courseId={courseId}
+                        questionId={currentQuestion._id}
                     />
                 );
             case 'true_false':
                 return (
                     <TrueFalseQuestion
-                        {...currentQuestion}
-                        setSelectedOption={(option) => setResponses({ ...responses, [currentQuestionIndex]: option })}
-                        onResponse={handleResponse}
-                        triesLeft={1} 
-                        response={responses[currentQuestionIndex]}
-                        isCorrect={results[currentQuestionIndex]}
+                        question={currentQuestion.question}
+                        correctAnswer={currentQuestion.correctAnswer}
+                        selectedOption={selectedOption}
+                        setSelectedOption={setSelectedOption}
+                        handleSubmit={handleResponse}
+                        response={response}
+                        isCorrect={isCorrect}
                         questionNumber={questionNumber}
+                        userId={userId}
+                        courseId={courseId}
+                        questionId={currentQuestion._id}
                     />
                 );
             case 'fill_in_the_blank':
                 return (
                     <FillInTheBlank
-                        {...currentQuestion}
-                        onResponse={handleResponse}
-                        response={responses[currentQuestionIndex]}
-                        isCorrect={results[currentQuestionIndex]}
+                        question={currentQuestion.question}
+                        correctAnswer={currentQuestion.correctAnswer}
+                        selectedOption={selectedOption}
+                        setSelectedOption={setSelectedOption}
+                        handleSubmit={handleResponse}
+                        response={response}
+                        isCorrect={isCorrect}
                         questionNumber={questionNumber}
+                        userId={userId}
+                        courseId={courseId}
+                        questionId={currentQuestion._id}
                     />
                 );
             default:
-                return <div>Unknown question type</div>;
+                return <div>Unknown question type.</div>;
         }
     };
 
-    console.log('Completed:', completed);
-
     return (
-        <div className="container mt-4">
-            <div className="row">
-            <div className="col d-flex justify-content-between">
-    {currentQuestionIndex > 0 && (
-        <button onClick={handlePrev} className="btn btn-primary">Previous</button>
-    )}
-    {completed ? (
-        <button onClick={() => console.log('Finish button clicked.')} className="btn btn-success">Finish</button>
-    ) : (
-        <button onClick={handleNext} className="btn btn-primary">Next</button>
-    )}
-</div>
-
-            </div>
-            <div className="row mt-3">
-                <div className="col">
-                    {renderQuestion()}
-                </div>
+        <div>
+            {renderQuestion()}
+            <div className="mt-4 d-flex justify-content-center">
+                <button className="btn btn-secondary me-2" onClick={handlePrev} disabled={currentQuestionIndex === 0}>
+                    Previous
+                </button>
+                <button className="btn btn-primary" onClick={handleNext} disabled={currentQuestionIndex === questions.length - 1}>
+                    Next
+                </button>
             </div>
         </div>
     );

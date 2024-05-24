@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 
-function CourseEnroll() {
+function CourseEnroll(userId) {
     const { courseId } = useParams();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

@@ -1,35 +1,41 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useAuthorization } from './AuthorizationContext';
 
 const FriendsList = () => {
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { currentUser } = useAuthorization();
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        // Simulate fetching friends data
-        const fetchFriends = async () => {
-            try {
-                setLoading(true);
-                // Simulate API response delay
-                setTimeout(() => {
-                    const mockFriendsData = [
-                        { id: 1, nickname: 'Friend 1' },
-                        { id: 2, nickname: 'Friend 2' },
-                        { id: 3, nickname: 'Friend 3' }
-                        // Add more mock friends data as needed
-                    ];
-                    setFriends(mockFriendsData);
-                    setLoading(false);
-                }, 1000); // Simulate 1 second delay
-            } catch (error) {
-                console.error('Error fetching friends:', error);
-                setError('Failed to fetch friends');
-                setLoading(false);
-            }
-        };
+    const fetchFriends = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get(`http://localhost:5001/users/${currentUser._id}/friends`);
+            setFriends(response.data);
+            setLoading(false);
+        } catch (error) {
+            console.log(error);
+            setError('Failed to fetch friends');
+            setLoading(false);
+        }
+    };
 
-        fetchFriends();
-    }, []);
+    const removeFriend = async (friendId) => {
+        try {
+            await axios.delete(`http://localhost:5001/users/${currentUser._id}/friends/${friendId}`);
+            setFriends(friends.filter(friend => friend._id !== friendId));
+        } catch (error) {
+            console.error('Error removing friend:', error);
+            setError('Failed to remove friend');
+        }
+    };
+
+    useEffect(() => {
+        if (currentUser) {
+            fetchFriends();
+        }
+    }, [currentUser]);
 
     if (loading) return <div>Loading friends...</div>;
     if (error) return <div>{error}</div>;
@@ -40,10 +46,16 @@ const FriendsList = () => {
             <div className="row">
                 {friends.length > 0 ? (
                     friends.map(friend => (
-                        <div key={friend.id} className="col-md-4 mb-4">
+                        <div key={friend._id} className="col-md-4 mb-4">
                             <div className="card">
                                 <div className="card-body">
                                     <h5 className="card-title">{friend.nickname}</h5>
+                                    <button
+                                        className="btn btn-danger"
+                                        onClick={() => removeFriend(friend._id)}
+                                    >
+                                        Remove Friend
+                                    </button>
                                 </div>
                             </div>
                         </div>
