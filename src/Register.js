@@ -17,7 +17,7 @@ const Register = ({ onRegisterSuccess }) => {
       const userData = response.data.user;
 
       // Redirect to the desired page upon successful registration
-      onRegisterSuccess('/usercourses');
+      onRegisterSuccess('/login');
     } catch (error) {
       // Handle error responses from the server
       if (error.response) {

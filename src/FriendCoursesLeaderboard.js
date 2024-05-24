@@ -47,25 +47,31 @@ const FriendCoursesLeaderboard = () => {
     <div className="container">
       <h2 className="mt-4 mb-4">Leaderboard</h2>
       <div className="row">
-        {filteredCourses.map(course => (
-          <div key={course._id} className="col-md-6">
-            <div className="card mb-4">
-              <div className="card-header">{course.courseName}</div>
-              <ul className="list-group list-group-flush">
-                {/* Current User's Progress */}
-                <li key={currentUser._id} className="list-group-item">
-                  <strong>{currentUser.nickname}</strong> - {currentUser.progress[0].points} points
-                </li>
-                {/* Friends' Progress */}
-                {friends.map(friend => (
-                  <li key={friend._id} className="list-group-item">
-                    <strong>{friend.nickname}</strong> - {friend.progress[getCourseIndex(friend._id, course._id)].points} points
-                  </li>
-                ))}
-              </ul>
-            </div>
+        {friends.length === 0 ? (
+          <div className="col-md-12">
+            <p>No friends yet</p>
           </div>
-        ))}
+        ) : (
+          filteredCourses.map(course => (
+            <div key={course._id} className="col-md-6">
+              <div className="card mb-4">
+                <div className="card-header">{course.courseName}</div>
+                <ul className="list-group list-group-flush">
+                  {/* Current User's Progress */}
+                  <li key={currentUser._id} className="list-group-item">
+                    <strong>{currentUser.nickname}</strong> - {currentUser.progress[0].points} points
+                  </li>
+                  {/* Friends' Progress */}
+                  {friends.map(friend => (
+                    <li key={friend._id} className="list-group-item">
+                      <strong>{friend.nickname}</strong> - {friend.progress[getCourseIndex(friend._id, course._id)].points} points
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

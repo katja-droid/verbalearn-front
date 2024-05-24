@@ -11,19 +11,24 @@ export const AuthorizationProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
-        // Check if user is already logged in from local storage
+        // Retrieve user data from localStorage on component mount
         const storedUser = localStorage.getItem('currentUser');
         const storedAuthorization = localStorage.getItem('isAuthorized');
 
         if (storedUser && storedAuthorization) {
-            setCurrentUser(JSON.parse(storedUser));
-            setIsAuthorized(JSON.parse(storedAuthorization));
+            try {
+                setCurrentUser(JSON.parse(storedUser));
+                setIsAuthorized(JSON.parse(storedAuthorization));
+            } catch (error) {
+                console.error('Error parsing user data from localStorage:', error);
+            }
         }
     }, []);
 
     const login = (userData) => {
         setIsAuthorized(true);
         setCurrentUser(userData);
+        // Store user data in localStorage upon login
         localStorage.setItem('currentUser', JSON.stringify(userData));
         localStorage.setItem('isAuthorized', JSON.stringify(true));
     };
@@ -31,6 +36,7 @@ export const AuthorizationProvider = ({ children }) => {
     const logout = () => {
         setIsAuthorized(false);
         setCurrentUser(null);
+        // Remove user data from localStorage upon logout
         localStorage.removeItem('currentUser');
         localStorage.removeItem('isAuthorized');
     };
@@ -40,6 +46,7 @@ export const AuthorizationProvider = ({ children }) => {
             ...prevUser,
             friends: [...prevUser.friends, friend]
         }));
+        // Update user data in localStorage when adding a friend
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
     };
 
