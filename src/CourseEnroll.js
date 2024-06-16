@@ -13,10 +13,10 @@ function CourseEnroll() {
         const enrollCourse = async () => {
             try {
                 // Make a POST request to enroll the user in the course
-                await axios.post(`https://localhost:5001/users/${currentUser.id}/courses`, { courseId });
+                await axios.post(`https://verbalearn-back.onrender.com/users/${currentUser.id}/courses`, { courseId });
 
                 // Fetch the updated user data
-                const response = await axios.get(`https://localhost:5001/users/${currentUser.id}`);
+                const response = await axios.get(`https://verbalearn-back.onrender.com/users/${currentUser.id}`);
                 const updatedUser = response.data;
 
                 // Update the currentUser state with the new data

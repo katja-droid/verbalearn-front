@@ -13,7 +13,7 @@ function FillInTheBlank({ question, correctAnswer, questionNumber, courseId, que
     useEffect(() => {
         const fetchQuestionProgress = async () => {
             try {
-                const response = await axios.get(`http://localhost:5001/users/${currentUser._id}/progress/${courseId}/questions/${questionId}`);
+                const response = await axios.get(`https://verbalearn-back.onrender.com/users/${currentUser._id}/progress/${courseId}/questions/${questionId}`);
                 setQuestionProgress(response.data);
                 setTriesLeft(response.data.triesLeft);
             } catch (error) {
@@ -42,7 +42,7 @@ function FillInTheBlank({ question, correctAnswer, questionNumber, courseId, que
         setTriesLeft(newTriesLeft);
 
         try {
-            await axios.put(`http://localhost:5001/users/${currentUser._id}/progress/${courseId}/questions/${questionId}/update`, {
+            await axios.put(`https://verbalearn-back.onrender.com/users/${currentUser._id}/progress/${courseId}/questions/${questionId}/update`, {
                 answered: correct || newTriesLeft === 0,
                 correct: correct,
                 triesLeft: newTriesLeft

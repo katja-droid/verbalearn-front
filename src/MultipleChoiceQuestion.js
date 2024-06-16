@@ -14,7 +14,7 @@ function MultipleChoiceQuestion({ question, options, correctAnswer, questionNumb
     useEffect(() => {
         const fetchQuestionProgress = async () => {
             try {
-                const response = await axios.get(`http://localhost:5001/users/${currentUser._id}/progress/${courseId}/questions/${questionId}`);
+                const response = await axios.get(`https://verbalearn-back.onrender.com/users/${currentUser._id}/progress/${courseId}/questions/${questionId}`);
                 setQuestionProgress(response.data);
                 setTriesLeft(response.data.triesLeft);
             } catch (error) {
@@ -49,7 +49,7 @@ function MultipleChoiceQuestion({ question, options, correctAnswer, questionNumb
         setTriesLeft(triesLeft - 1);
 
         try {
-            const response = await axios.put(`http://localhost:5001/users/${currentUser._id}/progress/${courseId}/questions/${questionId}/update`, {
+            const response = await axios.put(`https://verbalearn-back.onrender.com/users/${currentUser._id}/progress/${courseId}/questions/${questionId}/update`, {
                 correct: correct,
                 answered: correct || triesLeft - 1 === 0,
             });

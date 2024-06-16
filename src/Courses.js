@@ -15,7 +15,7 @@ function Courses() {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const response = await axios.get('http://localhost:5001/courses');
+                const response = await axios.get('https://verbalearn-back.onrender.com/courses');
                 setCourses(response.data);
             } catch (error) {
                 console.error('Error fetching courses:', error);
@@ -35,7 +35,7 @@ function Courses() {
         setError(null);
 
         try {
-            await axios.post(`http://localhost:5001/users/${currentUser._id}/courses`, { courseId });
+            await axios.post(`https://verbalearn-back.onrender.com/users/${currentUser._id}/courses`, { courseId });
             setEnrolling(null);
             alert('Enrolled in course successfully!');
         } catch (error) {
