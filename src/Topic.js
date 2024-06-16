@@ -58,7 +58,7 @@ function Topic() {
         <h2>Topic Information</h2>
         <p className="mb-4">{topic.information}</p>
         <div className="embed-responsive embed-responsive-16by9 mb-4">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/sp3xU5WvRjA?si=8ppRn6sD6v-tQXMD" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>     </div>
+        <iframe width="560" height="315" src={topic.youTubeLink} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>     </div>
         
         <button onClick={handleStartQuestions} className="btn btn-primary">Start Questions</button>
     </div>
@@ -68,7 +68,7 @@ function Topic() {
     return (
         <div>
             {!showQuestions && informationSlide}
-            {showQuestions && <QuestionNavigator courseId = {course._id} questions={questions} />}
+            {showQuestions && <QuestionNavigator courseId = {course._id} courseName={course.courseName} questions={questions} />}
         </div>
     );
 }

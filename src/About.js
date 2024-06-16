@@ -1,6 +1,9 @@
 import React from 'react'
-
+import { useNavigate } from 'react-router-dom';
+import { useAuthorization } from './AuthorizationContext';
 const About = () => {
+ const navigate = useNavigate();
+ const { isAuthorized } = useAuthorization();
   return (
     <div className="container mt-5">
         <h1 className="text-center mb-4">About us</h1>
@@ -25,7 +28,28 @@ Let's break the language barrier together! Explore our diverse range of language
 
 Join us and discover the joy of learning and connecting through language. Start your journey with VerbaLearn today.</p>
    
-      
+{!isAuthorized && (
+       <div className='container' style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '30vh' }}>
+       <h4 className="text-center mb-4 text-muted" style={{ paddingTop: '10px' }}>Log in or register to access courses!</h4>
+       <button 
+         className="btn" 
+         style={{ width: '80%', fontWeight: 'bold', fontSize: '1.2em', backgroundColor: '#007bff', color: '#fff', border: 'none', padding: '10px' }}
+         onClick={() => navigate('/register')}
+       >
+         Register
+       </button>
+       <button 
+         className="btn" 
+         style={{ width: '80%', fontWeight: 'bold', marginTop: '10px', fontSize: '1.2em', border: '2px solid #007bff', backgroundColor: '#fff', color: '#007bff', padding: '10px' }}
+         onClick={() => navigate('/login')}
+       >
+         Login
+       </button>
+   </div>
+   
+   
+    
+        )}
     </div>
   )
 }

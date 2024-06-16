@@ -43,14 +43,14 @@ function FillInTheBlank({ question, correctAnswer, questionNumber, courseId, que
 
         try {
             await axios.put(`http://localhost:5001/users/${currentUser._id}/progress/${courseId}/questions/${questionId}/update`, {
-                answered: newTriesLeft === 0,
+                answered: correct || newTriesLeft === 0,
                 correct: correct,
                 triesLeft: newTriesLeft
             });
 
             setQuestionProgress(prev => ({
                 ...prev,
-                answered: newTriesLeft === 0,
+                answered: correct || newTriesLeft === 0,
                 correct: correct,
                 triesLeft: newTriesLeft
             }));
@@ -74,17 +74,16 @@ function FillInTheBlank({ question, correctAnswer, questionNumber, courseId, que
                         />
                         <button
                             type="submit"
-                            className="btn btn-primary mt-3"
+                            className="btn btn-primary"
+                            
                             disabled={questionProgress?.answered || triesLeft === 0}
                         >
                             Submit
                         </button>
                     </form>
-                    {triesLeft<3 && isCorrect !== undefined && (
-    <div className="alert mt-2" role="alert" style={{ color: isCorrect ? 'green' : 'red' }}>
-        {isCorrect ? "Correct!" : "Incorrect!"}
-    </div>
-)}
+                    {isCorrect !== undefined && (
+                        <p className="mt-2">{isCorrect ? "Correct!" : "Incorrect!"}</p>
+                    )}
                     <div className="mt-2">Tries left: {triesLeft}</div>
                     {questionProgress?.answered && <div className="mt-2 text-muted">This question has been answered.</div>}
                 </div>

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuthorization } from './AuthorizationContext';
 import { useNavigate } from 'react-router-dom';
 const Navbar = () => {
-    const { setIsAuthorized } = useAuthorization();
+    const { isAuthorized, setIsAuthorized } = useAuthorization();
     const navigate = useNavigate();
     const handleLogout = () => {
         setIsAuthorized(false);
@@ -17,6 +17,7 @@ const Navbar = () => {
                     <span className="navbar-toggler-icon"></span>
                 </button>
                 <div className="collapse navbar-collapse" id="navbarNav">
+                {isAuthorized ? (
                     <ul className="navbar-nav ms-auto">
                         <li className="nav-item">
                             <Link className="nav-link" to="/searchfriends">Search Friends</Link>
@@ -40,6 +41,13 @@ const Navbar = () => {
                             <button className="btn btn-primary" onClick={handleLogout}>Logout</button>
                         </li>
                     </ul>
+                     ) : (
+                        <ul className="navbar-nav ms-auto">
+                            <li className="nav-item">
+                                <Link className="btn btn-primary"  to="/login">Login</Link>
+                            </li>
+                        </ul>
+                    )}
                 </div>
             </div>
         </nav>

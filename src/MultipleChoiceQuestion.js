@@ -3,7 +3,7 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useAuthorization } from './AuthorizationContext';
 
-function MultipleChoiceQuestion({ question, options, correctAnswer, questionNumber, userId, courseId, questionId }) {
+function MultipleChoiceQuestion({ question, options, correctAnswer, questionNumber, courseId, questionId }) {
     const [selectedOption, setSelectedOption] = useState('');
     const [response, setResponse] = useState('');
     const [isCorrect, setIsCorrect] = useState(undefined);
@@ -23,16 +23,23 @@ function MultipleChoiceQuestion({ question, options, correctAnswer, questionNumb
         };
 
         fetchQuestionProgress();
-    }, [userId, courseId, questionId]);
+    }, [currentUser._id, courseId, questionId]);
+
+    useEffect(() => {
+        // Reset the state when questionId changes
+        setSelectedOption('');
+        setResponse('');
+        setIsCorrect(undefined);
+    }, [questionId]);
 
     const handleSubmission = async () => {
         if (selectedOption === '') {
-            setResponse('Please select an option');
+            setResponse('Please choose the correct option.');
             return;
         }
 
         if (questionProgress?.answered) {
-            setResponse('You have already answered this question.');
+            setResponse('This question has already been answered');
             return;
         }
 
@@ -42,18 +49,13 @@ function MultipleChoiceQuestion({ question, options, correctAnswer, questionNumb
         setTriesLeft(triesLeft - 1);
 
         try {
-            await axios.put(`http://localhost:5001/users/${currentUser._id}/progress/${courseId}/questions/${questionId}/update`, {
-                answered: triesLeft - 1 === 0,  // Set answered to true only if no tries left
+            const response = await axios.put(`http://localhost:5001/users/${currentUser._id}/progress/${courseId}/questions/${questionId}/update`, {
                 correct: correct,
-                triesLeft: triesLeft - 1 // Decrease tries left
+                answered: correct || triesLeft - 1 === 0,
             });
+
             // Update local question progress after submitting
-            setQuestionProgress(prev => ({
-                ...prev,
-                answered: triesLeft - 1 === 0,
-                correct: correct,
-                triesLeft: prev.triesLeft - 1
-            }));
+            setQuestionProgress(response.data.questionProgress);
         } catch (error) {
             console.error('Error updating question progress:', error);
         }
@@ -82,7 +84,7 @@ function MultipleChoiceQuestion({ question, options, correctAnswer, questionNumb
                         </div>
                     ))}
                     <button
-                        className="btn btn-primary mt-2"
+                        className="btn btn-primary"
                         onClick={handleSubmission}
                         disabled={triesLeft === 0 || questionProgress?.answered}
                     >

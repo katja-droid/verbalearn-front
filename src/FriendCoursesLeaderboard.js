@@ -5,9 +5,18 @@ import { useAuthorization } from './AuthorizationContext';
 const FriendCoursesLeaderboard = () => {
   const [friends, setFriends] = useState([]);
   const [courses, setCourses] = useState([]);
-  const { currentUser } = useAuthorization();
+  const { currentUser, setCurrentUser } = useAuthorization();
 
   useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const userResponse = await axios.get(`http://localhost:5001/users/${currentUser._id}`);
+        setCurrentUser(userResponse.data);
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      }
+    };
+
     const fetchFriendsAndCourses = async () => {
       try {
         // Fetch user's friends
@@ -26,21 +35,20 @@ const FriendCoursesLeaderboard = () => {
       }
     };
 
-    fetchFriendsAndCourses();
-  }, [currentUser._id]);
+    if (currentUser) {
+      fetchCurrentUser().then(fetchFriendsAndCourses);
+    }
+  }, [currentUser?._id, setCurrentUser]);
 
   // Function to get the course index in the progress array
-  const getCourseIndex = (userId, courseId) => {
-    const user = friends.find(friend => friend._id === userId) || currentUser;
+  const getCourseProgress = (user, courseId) => {
     const progress = user.progress.find(progress => progress.courseId === courseId);
-    return progress ? user.progress.indexOf(progress) : -1;
+    return progress ? progress.points : 0; // Default to 0 if no progress is found
   };
 
-  // Filter courses to include only those where all friends are enrolled
+  // Filter courses to include only those where the current user is enrolled
   const filteredCourses = courses.filter(course =>
-    friends.every(friend =>
-      friend.progress.some(progress => progress.courseId === course._id)
-    )
+    currentUser.progress.some(progress => progress.courseId === course._id)
   );
 
   return (
@@ -49,7 +57,7 @@ const FriendCoursesLeaderboard = () => {
       <div className="row">
         {friends.length === 0 ? (
           <div className="col-md-12">
-            <p>No friends yet</p>
+            <p>You don't have friends yet.</p>
           </div>
         ) : (
           filteredCourses.map(course => (
@@ -59,12 +67,12 @@ const FriendCoursesLeaderboard = () => {
                 <ul className="list-group list-group-flush">
                   {/* Current User's Progress */}
                   <li key={currentUser._id} className="list-group-item">
-                    <strong>{currentUser.nickname}</strong> - {currentUser.progress[0].points} points
+                    <strong>{currentUser.nickname}</strong> - {getCourseProgress(currentUser, course._id)} points
                   </li>
                   {/* Friends' Progress */}
                   {friends.map(friend => (
                     <li key={friend._id} className="list-group-item">
-                      <strong>{friend.nickname}</strong> - {friend.progress[getCourseIndex(friend._id, course._id)].points} points
+                      <strong>{friend.nickname}</strong> - {getCourseProgress(friend, course._id)} points
                     </li>
                   ))}
                 </ul>

@@ -31,13 +31,13 @@ function App() {
                     <Route path="/" element={<Layout />}>
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
-                        <Route index element={<LoginPage />} />
                         <Route path="/usercourses" element={<UserCourses />} />
                         <Route path="/courses" element={<Courses />} />
                         <Route path="/user" element={<UserData />} />
                         <Route path="/leaderboard" element={<FriendCoursesLeaderboard />} />
                         <Route path="/searchfriends" element={<FriendSearch />} />
                         <Route path="/friends" element={<FriendsList />}/>
+                        <Route index element={<About />} />
                         <Route path="/about" element={<About />}/>
                         {/* Nested route for courses */}
                         <Route path="/courses/:courseName" element={<Course />}>

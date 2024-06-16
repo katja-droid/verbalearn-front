@@ -19,8 +19,20 @@ const FriendSearch = () => {
                 console.error('Error fetching all users data:', error);
             }
         };
+
+        // Fetch current user's friends
+        const fetchUserFriends = async () => {
+            try {
+                const response = await axios.get(`http://localhost:5001/users/${currentUser._id}/friends`);
+                setFriends(response.data);
+            } catch (error) {
+                console.error('Error fetching user friends:', error);
+            }
+        };
+
         fetchAllUsers();
-    }, []);
+        fetchUserFriends();
+    }, [currentUser._id]);
 
     // Function to handle search
     const handleSearch = () => {
@@ -32,8 +44,14 @@ const FriendSearch = () => {
         setSearchResults(results);
     };
 
+    const isFriend = (userId) => {
+        return friends.some(friend => friend._id === userId);
+    };
+
     // Function to handle adding a user as friend
     const handleAddFriend = async (friend) => {
+        if (isFriend(friend._id)) return; // Prevent adding if already a friend
+
         try {
             // Make a POST request to add friend to the current user
             await axios.post(`http://localhost:5001/users/${currentUser._id}/friends`, {
@@ -66,7 +84,13 @@ const FriendSearch = () => {
                             <div className="card">
                                 <div className="card-body">
                                     <h5 className="card-title">{user.nickname}</h5>
-                                    <button className="btn btn-primary" onClick={() => handleAddFriend(user)}>Add Friend</button>
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() => handleAddFriend(user)}
+                                        disabled={isFriend(user._id)}
+                                    >
+                                        {isFriend(user._id) ? 'Already added' : 'Add friend'}
+                                    </button>
                                 </div>
                             </div>
                         </div>

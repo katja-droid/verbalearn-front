@@ -51,7 +51,7 @@ const FriendsList = () => {
                                 <div className="card-body">
                                     <h5 className="card-title">{friend.nickname}</h5>
                                     <button
-                                        className="btn btn-danger"
+                                        className="btn btn-primary"
                                         onClick={() => removeFriend(friend._id)}
                                     >
                                         Remove Friend

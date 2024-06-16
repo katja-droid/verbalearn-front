@@ -77,7 +77,7 @@ function Courses() {
                         onChange={e => setLanguageFilter(e.target.value)}
                     >
                         <option value="">Filter by Language</option>
-                        {["en", "de"].map((language, index) => (
+                        {["en", "de", "fr"].map((language, index) => (
                             <option key={index} value={language}>{language}</option>
                         ))}
                     </select>
